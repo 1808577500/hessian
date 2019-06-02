@@ -1,0 +1,12 @@
+server:
+  port: 9991
+  servlet:
+    context-path: /
+spring:
+  aop:
+    proxy-target-class: false
+hessian:
+  base-package: com.hhweb
+  context-path: /
+  timeout: 20000
+  read-timeout: 20000

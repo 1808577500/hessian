@@ -1,0 +1,9 @@
+server:
+  port: 9999
+  servlet:
+    context-path: /
+hessian:
+  base-package: com.hhweb.service.test
+  context-path: /remote
+  timeout: 20000
+  read-timeout: 20000
