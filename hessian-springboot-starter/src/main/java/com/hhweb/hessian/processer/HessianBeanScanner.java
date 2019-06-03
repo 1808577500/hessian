@@ -6,12 +6,10 @@ import com.hhweb.hessian.autoconfigure.HessianProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.*;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -32,9 +30,12 @@ public class HessianBeanScanner extends ClassPathBeanDefinitionScanner {
 
     private HessianProperties hessianProperties;
 
-    public HessianBeanScanner(BeanDefinitionRegistry registry, HessianProperties hessianProperties) {
+    private Environment environment;
+
+    public HessianBeanScanner(BeanDefinitionRegistry registry, HessianProperties hessianProperties, Environment environment) {
         super(registry, false);
         this.hessianProperties = hessianProperties;
+        this.environment = environment;
         addIncludeFilter( new AnnotationTypeFilter( HessianClient.class));
         addIncludeFilter( new AnnotationTypeFilter( HessianService.class));
     }
@@ -49,46 +50,42 @@ public class HessianBeanScanner extends ClassPathBeanDefinitionScanner {
             try {
 
                 Class beanClass = Class.forName( metadata.getClassName());
-                hessianService = (HessianService) beanClass.getAnnotation(HessianService.class);
+                hessianService = (HessianService) beanClass.getAnnotation( HessianService.class);
 
-                GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+                BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition( HessianServiceExporter.class);
                 String path = hessianProperties.getContextPath() + hessianService.path();
-                if( !path.startsWith( "/")){
+                int char0 = path.charAt(0);
+                if( char0 != '/'){
                     path += "/";
-                }else if( path.charAt( 0) == path.charAt( 1) && path.charAt( 0) == '/'){
+                }else if( char0 == path.charAt( 1) && char0 == '/'){
                     path = path.substring( 1);
                 }
-                beanDefinition.setFactoryBeanName( path);
-                beanDefinition.setBeanClass( HessianServiceExporter.class);
-                beanDefinition.getPropertyValues().add("service", ((DefaultListableBeanFactory) registry).getBean( definitionHolder.getBeanName()));
-                beanDefinition.getPropertyValues().add("serviceInterface", beanClass.getInterfaces()[0]);
-                BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(beanDefinition, beanDefinition.getFactoryBeanName());
+                beanDefinitionBuilder.addPropertyReference( "service", definitionHolder.getBeanName());
+                beanDefinitionBuilder.addPropertyValue( "serviceInterface", beanClass.getInterfaces()[0]);
+                BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(  beanDefinitionBuilder.getBeanDefinition(), path);
                 BeanDefinitionReaderUtils.registerBeanDefinition(beanDefinitionHolder, registry);
                 //构造Mapping
             }catch (Exception e){
                 logger.error( "create HessianServiceExporter[" + hessianService.path() +"] bean error,plase check your code.", e);
             }
         }else {
-            GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
-            genericBeanDefinition.setFactoryBeanName( definitionHolder.getBeanName());
-            genericBeanDefinition.setBeanClass( HessianProxyFactoryBean.class);
-            genericBeanDefinition.getPropertyValues()
-                    .add( "serviceInterface", definitionHolder.getBeanDefinition().getBeanClassName())
-                    .add("connectTimeout", hessianProperties.getTimeout())
-                    .add("readTimeout", hessianProperties.getReadTimeout());
+            BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition( HessianProxyFactoryBean.class);
+            beanDefinitionBuilder.addPropertyValue( "serviceInterface", definitionHolder.getBeanDefinition().getBeanClassName());
+            beanDefinitionBuilder.addPropertyValue("connectTimeout", hessianProperties.getTimeout());
+            beanDefinitionBuilder.addPropertyValue("readTimeout", hessianProperties.getReadTimeout());
             try {
                 HessianClient hessianClient = Class.forName( definitionHolder.getBeanDefinition().getBeanClassName()).getAnnotation( HessianClient.class);
-                genericBeanDefinition.getPropertyValues().add( "serviceUrl", hessianClient.serviceUrl());
+                beanDefinitionBuilder.addPropertyValue( "serviceUrl", environment.resolvePlaceholders( hessianClient.serviceUrl()));
                 if( hessianClient.readTimeout() > 0){
-                    genericBeanDefinition.getPropertyValues().add("readTimeout", hessianProperties.getReadTimeout());
+                    beanDefinitionBuilder.addPropertyValue("readTimeout", hessianClient.readTimeout());
                 }
                 if( hessianClient.timeout() > 0){
-                    genericBeanDefinition.getPropertyValues().add("connectTimeout", hessianProperties.getTimeout());
+                    beanDefinitionBuilder.addPropertyValue("connectTimeout", hessianClient.timeout());
                 }
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                logger.error( "create HessianProxyFactoryBean[" + definitionHolder.getBeanDefinition().getBeanClassName() +"] bean error,plase check your code.", e);
             }
-            BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(genericBeanDefinition, genericBeanDefinition.getFactoryBeanName());
+            BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder( beanDefinitionBuilder.getBeanDefinition(), definitionHolder.getBeanName());
             BeanDefinitionReaderUtils.registerBeanDefinition( beanDefinitionHolder, registry);
         }
     }

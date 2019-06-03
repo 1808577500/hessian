@@ -2,7 +2,7 @@ package com.hhweb.test.api;
 
 import com.hhweb.hessian.annotation.HessianClient;
 
-@HessianClient( serviceUrl= "http://localhost:9999/remote/testService")
+@HessianClient( serviceUrl= "${service.url}/testService")
 public interface TestService {
 
     public String test(String name);

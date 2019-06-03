@@ -21,6 +21,9 @@ public class HessianProperties {
 
     private String contextPath = "/remoting";
 
+    /**
+     * 包名以(,;\t\n)等符号分割
+     */
     private String basePackage = "";
 
 }
