@@ -73,9 +73,11 @@ public class HessianBeanScanner extends ClassPathBeanDefinitionScanner {
             beanDefinitionBuilder.addPropertyValue( "serviceInterface", definitionHolder.getBeanDefinition().getBeanClassName());
             beanDefinitionBuilder.addPropertyValue("connectTimeout", hessianProperties.getTimeout());
             beanDefinitionBuilder.addPropertyValue("readTimeout", hessianProperties.getReadTimeout());
+
             try {
                 HessianClient hessianClient = Class.forName( definitionHolder.getBeanDefinition().getBeanClassName()).getAnnotation( HessianClient.class);
                 beanDefinitionBuilder.addPropertyValue( "serviceUrl", environment.resolvePlaceholders( hessianClient.serviceUrl()));
+                beanDefinitionBuilder.addPropertyValue( "hessian2", hessianClient.hessian2());
                 if( hessianClient.readTimeout() > 0){
                     beanDefinitionBuilder.addPropertyValue("readTimeout", hessianClient.readTimeout());
                 }

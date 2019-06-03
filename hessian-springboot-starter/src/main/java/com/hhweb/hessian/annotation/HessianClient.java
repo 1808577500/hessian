@@ -28,4 +28,8 @@ public @interface HessianClient {
 
     public String serviceUrl();
 
+    public boolean hessian2() default false;
+
+
+
 }
