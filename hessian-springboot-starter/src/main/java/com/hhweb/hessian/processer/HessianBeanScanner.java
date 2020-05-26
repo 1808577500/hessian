@@ -11,16 +11,10 @@ import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianServiceExporter;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
-import java.io.IOException;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 类扫描器

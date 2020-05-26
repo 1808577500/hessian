@@ -3,7 +3,7 @@ server:
   servlet:
     context-path: /
 hessian:
-  base-package: com.hhweb.service
+  base-package: com.hhweb
   context-path: /remote
   timeout: 20000
   read-timeout: 20000

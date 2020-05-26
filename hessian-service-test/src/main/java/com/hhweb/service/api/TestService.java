@@ -1,6 +1,8 @@
 package com.hhweb.service.api;
 
+import com.hhweb.bean.BeanA;
+
 public interface TestService {
 
-    public String test(String name);
+    public BeanA test(BeanA name);
 }

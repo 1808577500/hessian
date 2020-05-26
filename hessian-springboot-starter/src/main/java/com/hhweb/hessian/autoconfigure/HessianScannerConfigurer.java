@@ -9,8 +9,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
-import java.util.EventListener;
-
 
 public class HessianScannerConfigurer implements BeanDefinitionRegistryPostProcessor {
 

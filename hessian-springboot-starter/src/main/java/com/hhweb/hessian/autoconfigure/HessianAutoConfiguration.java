@@ -1,7 +1,5 @@
 package com.hhweb.hessian.autoconfigure;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 //import org.springframework.boot.bind.PropertySourcesPropertyValues;
 //import org.springframework.boot.bind.RelaxedDataBinder;
@@ -12,7 +10,6 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.MutablePropertySources;
 
 @Configuration
 @ConditionalOnProperty(
